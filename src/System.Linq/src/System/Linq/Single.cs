@@ -149,5 +149,76 @@ namespace System.Linq
 
             return default(TSource);
         }
-    }
+
+		public static TSource SingleOrElse<TSource>(this IEnumerable<TSource> source, TSource elseVal)
+		{
+			if (source == null)
+			{
+				throw Error.ArgumentNull(nameof(source));
+			}
+
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
+			{
+				switch (list.Count)
+				{
+					case 0: return elseVal;
+					case 1: return list[0];
+				}
+			}
+			else
+			{
+				using (IEnumerator<TSource> e = source.GetEnumerator())
+				{
+					if (!e.MoveNext())
+					{
+						return elseVal;
+					}
+
+					TSource result = e.Current;
+					if (!e.MoveNext())
+					{
+						return result;
+					}
+				}
+			}
+
+			throw Error.MoreThanOneElement();
+		}
+
+		public static TSource SingleOrElse<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, TSource elseVal)
+		{
+			if (source == null)
+			{
+				throw Error.ArgumentNull(nameof(source));
+			}
+
+			if (predicate == null)
+			{
+				throw Error.ArgumentNull(nameof(predicate));
+			}
+
+			using (IEnumerator<TSource> e = source.GetEnumerator())
+			{
+				while (e.MoveNext())
+				{
+					TSource result = e.Current;
+					if (predicate(result))
+					{
+						while (e.MoveNext())
+						{
+							if (predicate(e.Current))
+							{
+								throw Error.MoreThanOneMatch();
+							}
+						}
+
+						return result;
+					}
+				}
+			}
+
+			return elseVal;
+		}
+	}
 }

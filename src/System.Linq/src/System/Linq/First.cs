@@ -46,7 +46,33 @@ namespace System.Linq
             return source.TryGetFirst(predicate, out found);
         }
 
-        internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, out bool found)
+		public static TSource FirstOrElse<TSource>(this IEnumerable<TSource> source, TSource elseVal)
+		{
+			bool found;
+			TSource first = source.TryGetFirst(out found);
+
+			if (found)
+			{
+				return first;
+			}
+
+			return elseVal;
+		}
+
+		public static TSource FirstOrElse<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, TSource elseVal)
+		{
+			bool found;
+			TSource first = source.TryGetFirst(predicate, out found);
+
+			if (found)
+			{
+				return first;
+			}
+
+			return elseVal;
+		}
+
+		internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, out bool found)
         {
             if (source == null)
             {

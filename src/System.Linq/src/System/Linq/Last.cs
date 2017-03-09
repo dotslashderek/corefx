@@ -46,7 +46,31 @@ namespace System.Linq
             return source.TryGetLast(predicate, out found);
         }
 
-        internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
+		public static TSource LastOrElse<TSource>(this IEnumerable<TSource> source, TSource elseVal)
+		{
+			bool found;
+			TSource result = source.TryGetLast(out found);
+			if (found)
+			{
+				return result;
+			}
+
+			return elseVal; 
+		}
+
+		public static TSource LastOrElse<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+		{
+			bool found;
+			TSource result = source.TryGetLast(predicate, out found);
+			if (found)
+			{
+				return result;
+			}
+
+			return elseVal;
+		}
+
+		internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
         {
             if (source == null)
             {
